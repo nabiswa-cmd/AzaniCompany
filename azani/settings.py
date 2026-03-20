@@ -5,6 +5,8 @@ import os
 import dj_database_url
 load_dotenv()
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
 DEBUG = True
@@ -52,12 +54,31 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
+DEBUG = False  # in production
+ALLOWED_HOSTS = ['*']  # or your domain
+# ─────────────────────────
+# STATIC FILES (CSS, JS)
+# ─────────────────────────
 STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
     BASE_DIR / "core" / "static",
 ]
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "core" / "static",
+]
+
+# 🔴 THIS LINE MUST EXIST
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # ── Azani Business Constants ──
 REGISTRATION_FEE  = Decimal('8500.00')
 INSTALLATION_FEE  = Decimal('10000.00')
