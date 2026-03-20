@@ -3,15 +3,17 @@ from decimal import Decimal
 from dotenv import load_dotenv
 import os
 import dj_database_url
+
 load_dotenv()
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
 
+# SECURITY
+SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'  # get from env, default False
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
+# APPS
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -22,8 +24,10 @@ INSTALLED_APPS = [
     'core',
 ]
 
+# MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # must be right after SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -32,53 +36,46 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URLS
 ROOT_URLCONF = 'azani.urls'
 
+# TEMPLATES
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
     'DIRS': [BASE_DIR / 'core' / 'templates'],
     'APP_DIRS': True,
-    'OPTIONS': {'context_processors': [
-        'django.template.context_processors.debug',
-        'django.template.context_processors.request',
-        'django.contrib.auth.context_processors.auth',
-        'django.contrib.messages.context_processors.messages',
-    ]},
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ]
+    },
 }]
 
 WSGI_APPLICATION = 'azani.wsgi.application'
 
+# DATABASE
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+}
 
-DATABASES =  { 'default':dj_database_url.config(default = os.getenv('DATABASE_URL'))}
+# INTERNATIONALIZATION
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
-DEBUG = False  # in production
-ALLOWED_HOSTS = ['*']  # or your domain
-# ─────────────────────────
-# STATIC FILES (CSS, JS)
-# ─────────────────────────
+
+# STATIC FILES
 STATIC_URL = '/static/'
-
-STATICFILES_DIRS = [
-    BASE_DIR / "core" / "static",
-]
-
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
+STATICFILES_DIRS = [BASE_DIR / 'core' / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
+# DEFAULT PK FIELD TYPE
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "core" / "static",
-]
-
-# 🔴 THIS LINE MUST EXIST
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # ── Azani Business Constants ──
 REGISTRATION_FEE  = Decimal('8500.00')
 INSTALLATION_FEE  = Decimal('10000.00')
