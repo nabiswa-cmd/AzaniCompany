@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+{% block title %}Bandwidth Subscription{% endblock %}
+{% block page_title %}📶 Manage Bandwidth: {{ institution.name }}{% endblock %}
+{% block content %}
+{% if current_bandwidth %}<div class="alert alert-info">Current: <strong>{{ current_bandwidth }} MBPS</strong>. Upgrading gives a <strong>10% discount</strong>.</div>{% endif %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header bg-white border-0 pt-3 fw-semibold">Bandwidth Plans &amp; Pricing</div>
+      <div class="card-body p-0"><table class="table mb-0">
+        <thead><tr><th>Bandwidth</th><th>Base Cost (KSh)</th><th>Upgrade Cost (10% off)</th><th>Status</th></tr></thead>
+        <tbody>{% for row in cost_table %}
+        <tr {% if row.is_current %}class="table-success"{% elif row.is_upgrade %}class="table-info"{% endif %}>
+          <td><strong>{{ row.bandwidth }} MBPS</strong></td>
+          <td>KSh {{ row.base_cost|floatformat:2 }}</td>
+          <td>{% if row.is_upgrade %}<span class="text-success fw-semibold">KSh {{ row.discounted_cost|floatformat:2 }}</span>{% else %}—{% endif %}</td>
+          <td>{% if row.is_current %}<span class="badge badge-installed">Current</span>{% elif row.is_upgrade %}<span class="badge badge-ready">Available Upgrade</span>{% else %}—{% endif %}</td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="col-lg-5"><div class="form-card">
+    <div class="section-title">Subscribe / Upgrade</div>
+    <form method="post">{% csrf_token %}
+      <div class="mb-3"><label class="form-label fw-semibold">Select Bandwidth</label>{{ form.bandwidth }}
+        {% if form.bandwidth.errors %}<div class="text-danger small">{{ form.bandwidth.errors }}</div>{% endif %}</div>
+      <div class="mb-3"><label class="form-label fw-semibold">Start Date</label>{{ form.start_date }}</div>
+      <button type="submit" class="btn btn-azani w-100"><i class="bi bi-arrow-up-circle"></i> {% if current_bandwidth %}Upgrade Plan{% else %}Subscribe{% endif %}</button>
+      <a href="{% url 'institution_detail' institution.pk %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+    </form>
+  </div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% block title %}Registered Institutions Report{% endblock %}
+{% block page_title %}📋 Registered Institutions{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+  <span class="text-muted small">Generated: {{ report_date }}</span>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="d-none d-print-block text-center mb-4">
+  <h3>AZANI INTERNET SERVICE PROVIDER</h3><h5>Registered Institutions Report</h5>
+  <p>Date: {{ report_date }} | Total: {{ total }}</p><hr>
+</div>
+<div class="alert alert-light border"><strong>Total Registered: {{ total }}</strong></div>
+{% for type_name, inst_list in by_type.items %}
+<div class="card mb-3">
+  <div class="card-header bg-primary bg-opacity-10 border-0 pt-3 fw-bold text-primary">{{ type_name }} ({{ inst_list|length }})</div>
+  <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0 small">
+    <thead><tr><th>#</th><th>Name</th><th>County</th><th>Contact</th><th>Phone</th><th>Email</th><th>Status</th><th>Bandwidth</th><th>Registered</th></tr></thead>
+    <tbody>{% for inst in inst_list %}<tr>
+      <td>{{ forloop.counter }}</td>
+      <td><a href="{% url 'institution_detail' inst.pk %}" class="no-print">{{ inst.name }}</a><span class="d-none d-print-inline">{{ inst.name }}</span></td>
+      <td>{{ inst.county }}</td>
+      <td>{% if inst.contact_person %}{{ inst.contact_person.full_name }}{% else %}—{% endif %}</td>
+      <td>{{ inst.phone }}</td><td>{{ inst.email }}</td>
+      <td><span class="badge {% if inst.connection_status == 'INSTALLED' %}badge-installed{% elif inst.connection_status == 'DISCONNECTED' %}badge-disconnected{% elif inst.connection_status == 'PENDING' %}badge-pending{% elif inst.connection_status == 'READY' %}badge-ready{% elif inst.connection_status == 'NEEDS_INFRA' %}badge-needs-infra{% else %}bg-secondary text-white{% endif %}">{{ inst.get_connection_status_display }}</span></td>
+      <td>{% if inst.current_bandwidth %}{{ inst.current_bandwidth }} MBPS{% else %}—{% endif %}</td>
+      <td>{{ inst.registration_date }}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div></div>
+</div>
+{% endfor %}
+{% endblock %}

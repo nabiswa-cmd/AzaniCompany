@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+{% block title %}Institutions — AZANI{% endblock %}
+{% block page_title %}🏫 Institutions{% endblock %}
+{% block content %}
+
+{# ── Search bar ── #}
+<div class="card mb-3 p-3">
+  <form method="get">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-5">{{ form.q }}</div>
+      <div class="col-6 col-md-3">{{ form.institution_type }}</div>
+      <div class="col-6 col-md-2">{{ form.status }}</div>
+      <div class="col-12 col-md-2">
+        <button type="submit" class="btn btn-azani w-100"><i class="bi bi-search"></i> Search</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">{{ institutions.count }} institution(s)</span>
+    <a href="{% url 'institution_register' %}" class="btn btn-azani btn-sm">
+      <i class="bi bi-plus-circle"></i> <span class="d-none d-sm-inline">Register</span>
+    </a>
+  </div>
+  <div class="table-responsive-wrapper">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th><th class="d-none d-md-table-cell">Type</th>
+          <th class="d-none d-lg-table-cell">County</th>
+          <th class="d-none d-xl-table-cell">Contact</th>
+          <th>Status</th>
+          <th class="d-none d-md-table-cell">MBPS</th>
+          <th class="d-none d-lg-table-cell">Registered</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inst in institutions %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            <a href="{% url 'institution_detail' inst.pk %}" class="fw-semibold text-decoration-none d-block">
+              {{ inst.name|truncatechars:28 }}
+            </a>
+            <span class="badge bg-primary bg-opacity-10 text-primary d-md-none" style="font-size:.65rem;">
+              {{ inst.get_institution_type_display }}
+            </span>
+          </td>
+          <td class="d-none d-md-table-cell">
+            <span class="badge bg-primary bg-opacity-10 text-primary">{{ inst.get_institution_type_display }}</span>
+          </td>
+          <td class="d-none d-lg-table-cell">{{ inst.county }}</td>
+          <td class="d-none d-xl-table-cell">
+            {% if inst.contact_person %}
+              <small>{{ inst.contact_person.full_name }}<br>{{ inst.contact_person.phone }}</small>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% with s=inst.connection_status %}
+            <span class="badge rounded-pill
+              {% if s == 'INSTALLED' %}badge-installed
+              {% elif s == 'DISCONNECTED' %}badge-disconnected
+              {% elif s == 'PENDING' %}badge-pending
+              {% elif s == 'ASSESSED' %}badge-assessed
+              {% elif s == 'READY' %}badge-ready
+              {% elif s == 'NEEDS_INFRA' %}badge-needs-infra
+              {% else %}bg-secondary text-white{% endif %}"
+              style="font-size:.7rem;white-space:nowrap;">
+              {{ inst.get_connection_status_display }}
+            </span>
+            {% endwith %}
+          </td>
+          <td class="d-none d-md-table-cell">
+            {% if inst.current_bandwidth %}{{ inst.current_bandwidth }}{% else %}—{% endif %}
+          </td>
+          <td class="d-none d-lg-table-cell"><small>{{ inst.registration_date }}</small></td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'institution_detail' inst.pk %}" class="btn btn-xs btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+              <a href="{% url 'institution_edit' inst.pk %}" class="btn btn-xs btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center py-5 text-muted">
+            <i class="bi bi-building fs-2 d-block mb-2"></i>
+            No institutions found. <a href="{% url 'institution_register' %}">Register one</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

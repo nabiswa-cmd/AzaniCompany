@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+{% block title %}Infrastructure Report{% endblock %}
+{% block page_title %}🖥️ Infrastructure Requirements{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 no-print">
+  <span class="text-muted small">Generated: {{ report_date }}</span>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="d-none d-print-block text-center mb-4"><h3>AZANI INTERNET SERVICE PROVIDER</h3><h5>Infrastructure Requirements Report</h5><p>Date: {{ report_date }}</p><hr></div>
+<div class="row g-2 mb-3">
+  <div class="col-sm-3"><div class="card p-3 text-center"><div class="text-muted small">Total PCs to Buy</div><div class="fw-bold fs-4">{{ total_pcs }}</div></div></div>
+  <div class="col-sm-3"><div class="card p-3 text-center"><div class="text-muted small">PC Cost (KSh)</div><div class="fw-bold text-primary">{{ total_pc_cost|floatformat:2 }}</div></div></div>
+  <div class="col-sm-3"><div class="card p-3 text-center"><div class="text-muted small">Total LAN Nodes</div><div class="fw-bold fs-4">{{ total_lan }}</div></div></div>
+  <div class="col-sm-3"><div class="card p-3 text-center"><div class="text-muted small">LAN Cost (KSh)</div><div class="fw-bold text-warning">{{ total_lan_cost|floatformat:2 }}</div></div></div>
+</div>
+<div class="card"><div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0 small">
+  <thead><tr><th>#</th><th>Institution</th><th>Type</th><th>Users</th><th>Computers</th><th>✓</th><th>LAN Nodes</th><th>✓</th><th>PCs to Buy</th><th>PC Cost (KSh)</th><th>LAN to Buy</th><th>LAN Cost (KSh)</th><th>Ready?</th><th>Total Infra (KSh)</th></tr></thead>
+  <tbody>{% for a in assessments %}<tr>
+    <td>{{ forloop.counter }}</td>
+    <td><a href="{% url 'institution_detail' a.institution.pk %}" class="no-print">{{ a.institution.name }}</a><span class="d-none d-print-inline">{{ a.institution.name }}</span></td>
+    <td>{{ a.institution.get_institution_type_display }}</td>
+    <td>{{ a.number_of_users }}</td>
+    <td>{{ a.number_of_computers }}</td><td>{% if a.has_computers %}✅{% else %}❌{% endif %}</td>
+    <td>{{ a.number_of_lan_nodes }}</td><td>{% if a.has_lan %}✅{% else %}❌{% endif %}</td>
+    <td>{% if a.pcs_to_purchase %}{{ a.pcs_to_purchase }}{% else %}—{% endif %}</td>
+    <td>{% if a.pc_purchase_cost %}{{ a.pc_purchase_cost|floatformat:0 }}{% else %}—{% endif %}</td>
+    <td>{% if a.lan_nodes_to_purchase %}{{ a.lan_nodes_to_purchase }}{% else %}—{% endif %}</td>
+    <td>{% if a.lan_node_cost %}{{ a.lan_node_cost|floatformat:0 }}{% else %}—{% endif %}</td>
+    <td>{% if a.is_ready %}<span class="badge badge-installed">Yes</span>{% else %}<span class="badge badge-disconnected">No</span>{% endif %}</td>
+    <td class="fw-semibold">{% if a.total_infrastructure_cost %}{{ a.total_infrastructure_cost|floatformat:0 }}{% else %}—{% endif %}</td>
+  </tr>{% empty %}<tr><td colspan="14" class="text-center text-muted py-4">No site assessments recorded.</td></tr>{% endfor %}</tbody>
+  <tfoot class="table-secondary fw-bold"><tr>
+    <td colspan="8" class="text-end">TOTALS:</td>
+    <td>{{ total_pcs }}</td><td>{{ total_pc_cost|floatformat:0 }}</td>
+    <td>{{ total_lan }}</td><td>{{ total_lan_cost|floatformat:0 }}</td>
+    <td></td><td>{{ total_pc_cost|floatformat:0 }}</td>
+  </tr></tfoot>
+</table></div></div></div>
+{% endblock %}

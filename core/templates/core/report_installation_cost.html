@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+{% block title %}Installation Cost — {{ institution.name }}{% endblock %}
+{% block page_title %}🔧 Installation Cost: {{ institution.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 no-print">
+  <a href="{% url 'institution_detail' institution.pk %}" class="btn btn-sm btn-outline-secondary">← Institution</a>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="d-none d-print-block text-center mb-4"><h3>AZANI INTERNET SERVICE PROVIDER</h3><h5>Installation Cost Report</h5><p>Institution: {{ institution.name }} | Date: {{ report_date }}</p><hr></div>
+<div class="row g-3">
+  <div class="col-lg-5"><div class="form-card">
+    <div class="section-title">Institution</div>
+    <table class="table table-borderless small mb-0">
+      <tr><td class="text-muted">Name:</td><td class="fw-semibold">{{ institution.name }}</td></tr>
+      <tr><td class="text-muted">Type:</td><td>{{ institution.get_institution_type_display }}</td></tr>
+      <tr><td class="text-muted">County:</td><td>{{ institution.county }}</td></tr>
+      <tr><td class="text-muted">Status:</td><td>{{ institution.get_connection_status_display }}</td></tr>
+    </table>
+  </div></div>
+  <div class="col-lg-7"><div class="form-card">
+    <div class="section-title">Cost Breakdown</div>
+    <table class="table table-borderless small mb-0">
+      <tr><td>Registration Fee:</td><td class="fw-semibold text-end">KSh {{ registration_fee|floatformat:2 }}</td></tr>
+      {% if assessment %}
+      {% if assessment.pcs_to_purchase %}<tr><td>PCs ({{ assessment.pcs_to_purchase }} × KSh 40,000):</td><td class="fw-semibold text-end">KSh {{ assessment.pc_purchase_cost|floatformat:2 }}</td></tr>{% endif %}
+      {% if assessment.lan_nodes_to_purchase %}<tr><td>LAN Nodes ({{ assessment.lan_nodes_to_purchase }} nodes):</td><td class="fw-semibold text-end">KSh {{ assessment.lan_node_cost|floatformat:2 }}</td></tr>{% endif %}
+      {% endif %}
+      <tr><td>Installation Fee:</td><td class="fw-semibold text-end">KSh {{ installation_fee|floatformat:2 }}</td></tr>
+      <tr class="table-success fw-bold border-top">
+        <td>TOTAL INSTALLATION COST:</td>
+        <td class="text-end">KSh {% if assessment %}{{ assessment.total_installation_cost|floatformat:2 }}{% else %}{{ installation_fee|floatformat:2 }}{% endif %}</td>
+      </tr>
+    </table>
+  </div></div>
+</div>
+<div class="card mt-3">
+  <div class="card-header bg-white border-0 pt-3 fw-semibold">Payment Records</div>
+  <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0 small">
+    <thead><tr><th>Receipt</th><th>Type</th><th>Amount (KSh)</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>{% for p in payments %}<tr>
+      <td><code>{{ p.receipt_number }}</code></td><td>{{ p.get_payment_type_display }}</td>
+      <td class="fw-semibold">{{ p.amount|floatformat:2 }}</td>
+      <td><span class="badge {% if p.status == 'PAID' %}badge-paid{% else %}badge-unpaid{% endif %}">{{ p.status }}</span></td>
+      <td>{{ p.payment_date|default:"—" }}</td>
+    </tr>{% empty %}<tr><td colspan="5" class="text-center text-muted py-3">No payment records</td></tr>{% endfor %}</tbody>
+  </table></div></div>
+</div>
+{% endblock %}

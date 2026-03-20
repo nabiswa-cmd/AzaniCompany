@@ -1,0 +1,203 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ institution.name }}{% endblock %}
+{% block page_title %}🏫 {{ institution.name }}{% endblock %}
+{% block content %}
+<div class="row g-3">
+
+  {# ── LEFT COLUMN ── #}
+  <div class="col-lg-4">
+
+    {# Info card #}
+    <div class="card mb-3 p-3">
+      <div class="d-flex justify-content-between mb-2">
+        <div>
+          <h5 class="mb-1" style="font-size:1rem;">{{ institution.name }}</h5>
+          <span class="badge bg-primary bg-opacity-10 text-primary">{{ institution.get_institution_type_display }}</span>
+        </div>
+        <a href="{% url 'institution_edit' institution.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+      </div>
+      {% with s=institution.connection_status %}
+      <span class="badge rounded-pill px-3 py-2 mb-2
+        {% if s == 'INSTALLED' %}badge-installed{% elif s == 'DISCONNECTED' %}badge-disconnected
+        {% elif s == 'PENDING' %}badge-pending{% elif s == 'READY' %}badge-ready
+        {% elif s == 'NEEDS_INFRA' %}badge-needs-infra{% else %}bg-secondary text-white{% endif %}">
+        {{ institution.get_connection_status_display }}
+      </span>
+      {% endwith %}
+      <hr>
+      <div class="small">
+        <div class="mb-1"><i class="bi bi-geo-alt text-muted"></i> {{ institution.county }}{% if institution.sub_county %}, {{ institution.sub_county }}{% endif %}</div>
+        <div class="mb-1"><i class="bi bi-house text-muted"></i> {{ institution.address }}</div>
+        <div class="mb-1"><i class="bi bi-telephone text-muted"></i> {{ institution.phone }}</div>
+        <div class="mb-1"><i class="bi bi-envelope text-muted"></i> {{ institution.email }}</div>
+        <div class="mb-1"><i class="bi bi-calendar text-muted"></i> Registered: {{ institution.registration_date }}</div>
+        {% if institution.current_bandwidth %}
+        <div class="mb-1"><i class="bi bi-wifi text-success"></i> {{ institution.current_bandwidth }} MBPS — KSh {{ institution.monthly_fee|floatformat:2 }}/month</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Contact person #}
+    {% if institution.contact_person %}
+    <div class="card mb-3 p-3">
+      <div class="section-title"><i class="bi bi-person"></i> Contact Person</div>
+      <div class="fw-semibold">{{ institution.contact_person.full_name }}</div>
+      <div class="text-muted small">{{ institution.contact_person.designation }}</div>
+      <hr class="my-2">
+      <div class="small">
+        <div><i class="bi bi-telephone text-muted"></i> {{ institution.contact_person.phone }}</div>
+        <div><i class="bi bi-envelope text-muted"></i> {{ institution.contact_person.email }}</div>
+        <div><i class="bi bi-card-text text-muted"></i> ID: {{ institution.contact_person.national_id }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Actions #}
+    <div class="card p-3">
+      <div class="section-title">⚡ Actions</div>
+      <div class="d-grid gap-2">
+        {% if institution.connection_status == 'PENDING' %}
+          <a href="{% url 'pay_registration' institution.pk %}" class="btn btn-sm btn-outline-success"><i class="bi bi-cash"></i> Pay Registration Fee</a>
+          <a href="{% url 'site_assessment' institution.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-clipboard-check"></i> Record Site Assessment</a>
+        {% elif institution.connection_status == 'NEEDS_INFRA' %}
+          <a href="{% url 'pay_infrastructure' institution.pk %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pc-display"></i> Pay Infrastructure</a>
+          <a href="{% url 'site_assessment' institution.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-clipboard-check"></i> Update Assessment</a>
+        {% elif institution.connection_status == 'READY' %}
+          <a href="{% url 'pay_installation' institution.pk %}" class="btn btn-sm btn-success"><i class="bi bi-wifi"></i> Pay Installation & Go Live</a>
+        {% elif institution.connection_status == 'INSTALLED' %}
+          <a href="{% url 'manage_subscription' institution.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-up-circle"></i> Upgrade Bandwidth</a>
+        {% elif institution.connection_status == 'DISCONNECTED' %}
+          <div class="alert alert-danger py-2 small mb-0">⚠️ Disconnected — settle arrears + KSh 1,000 reconnection fee.</div>
+        {% endif %}
+        <a href="{% url 'report_installation_cost' institution.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-file-text"></i> Installation Cost</a>
+        <a href="{% url 'report_service_aggregate' institution.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-pie-chart"></i> Service Aggregate</a>
+      </div>
+    </div>
+  </div>
+
+  {# ── RIGHT COLUMN ── #}
+  <div class="col-lg-8">
+
+    {# Financial summary #}
+    <div class="row g-2 mb-3">
+      <div class="col-4"><div class="card p-2 p-md-3 text-center">
+        <div class="text-muted small">Total Paid</div><div class="fw-bold text-success" style="font-size:.95rem;">KSh {{ total_paid|floatformat:0 }}</div>
+      </div></div>
+      <div class="col-4"><div class="card p-2 p-md-3 text-center">
+        <div class="text-muted small">Outstanding</div><div class="fw-bold text-danger" style="font-size:.95rem;">KSh {{ total_outstanding|floatformat:0 }}</div>
+      </div></div>
+      <div class="col-4"><div class="card p-2 p-md-3 text-center">
+        <div class="text-muted small">Monthly Fee</div><div class="fw-bold text-primary" style="font-size:.95rem;">KSh {{ institution.monthly_fee|floatformat:0 }}</div>
+      </div></div>
+    </div>
+
+    {# Site Assessment #}
+    {% if institution.site_assessment %}
+    <div class="card mb-3">
+      <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-clipboard-data text-primary"></i> Site Assessment</span>
+        <a href="{% url 'site_assessment' institution.pk %}" class="btn btn-xs btn-outline-secondary">Edit</a>
+      </div>
+      <div class="card-body">{% with a=institution.site_assessment %}
+        <div class="row small g-1">
+          <div class="col-6">
+            <div><strong>Date:</strong> {{ a.assessment_date }}</div>
+            <div><strong>By:</strong> {{ a.assessed_by }}</div>
+            <div><strong>Users:</strong> {{ a.number_of_users }}</div>
+            <div><strong>Ready:</strong> {% if a.is_ready %}<span class="text-success">✅ Yes</span>{% else %}<span class="text-danger">❌ No</span>{% endif %}</div>
+          </div>
+          <div class="col-6">
+            <div><strong>Computers:</strong> {{ a.number_of_computers }} {% if a.has_computers %}✅{% else %}❌{% endif %}</div>
+            <div><strong>LAN Nodes:</strong> {{ a.number_of_lan_nodes }} {% if a.has_lan %}✅{% else %}❌{% endif %}</div>
+            {% if a.pcs_to_purchase %}<div class="text-warning"><strong>PCs to Buy:</strong> {{ a.pcs_to_purchase }} — KSh {{ a.pc_purchase_cost|floatformat:0 }}</div>{% endif %}
+            {% if a.lan_nodes_to_purchase %}<div class="text-warning"><strong>LAN to Buy:</strong> {{ a.lan_nodes_to_purchase }} — KSh {{ a.lan_node_cost|floatformat:0 }}</div>{% endif %}
+          </div>
+          {% if a.remarks %}<div class="col-12 mt-1 text-muted">📝 {{ a.remarks }}</div>{% endif %}
+        </div>
+      {% endwith %}</div>
+    </div>
+    {% endif %}
+
+    {# Subscriptions #}
+    {% if subscriptions %}
+    <div class="card mb-3">
+      <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-wifi text-success"></i> Bandwidth Subscriptions</span>
+        <a href="{% url 'manage_subscription' institution.pk %}" class="btn btn-xs btn-outline-primary">Manage</a>
+      </div>
+      <div class="table-responsive-wrapper">
+        <table class="table mb-0 small">
+          <thead><tr><th>Bandwidth</th><th>Cost/Month</th><th>Upgrade?</th><th>Discount</th><th>Start</th><th>Active</th></tr></thead>
+          <tbody>
+            {% for s in subscriptions %}
+            <tr>
+              <td>{{ s.get_bandwidth_display }}</td>
+              <td>KSh {{ s.monthly_cost|floatformat:2 }}</td>
+              <td>{% if s.is_upgrade %}<span class="badge badge-ready">Yes</span>{% else %}—{% endif %}</td>
+              <td>{% if s.discount_applied %}KSh {{ s.discount_applied|floatformat:0 }}{% else %}—{% endif %}</td>
+              <td style="white-space:nowrap;">{{ s.start_date }}</td>
+              <td>{% if s.is_active %}<span class="text-success">●</span>{% else %}<span class="text-muted">○</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Monthly bills #}
+    <div class="card mb-3">
+      <div class="card-header bg-white border-0 pt-3 fw-semibold">
+        <i class="bi bi-calendar-month text-primary"></i> Monthly Bills
+      </div>
+      <div class="table-responsive-wrapper">
+        <table class="table mb-0 small">
+          <thead><tr><th>Month</th><th>MBPS</th><th>Base</th><th class="d-none d-sm-table-cell">Fine</th><th class="d-none d-md-table-cell">Reconnect</th><th>Total</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for bill in monthly_bills %}
+            <tr>
+              <td style="white-space:nowrap;">{{ bill.billing_month|date:"M Y" }}</td>
+              <td>{{ bill.bandwidth }}</td>
+              <td>{{ bill.base_amount|floatformat:0 }}</td>
+              <td class="d-none d-sm-table-cell">{% if bill.overdue_fine %}<span class="text-danger">{{ bill.overdue_fine|floatformat:0 }}</span>{% else %}—{% endif %}</td>
+              <td class="d-none d-md-table-cell">{% if bill.reconnection_fee %}{{ bill.reconnection_fee|floatformat:0 }}{% else %}—{% endif %}</td>
+              <td class="fw-semibold" style="white-space:nowrap;">KSh {{ bill.total_amount|floatformat:0 }}</td>
+              <td><span class="badge {% if bill.status == 'PAID' %}badge-paid{% elif bill.status == 'OVERDUE' %}badge-overdue{% elif bill.status == 'DISCONNECTED' %}badge-disconnected{% else %}badge-pending{% endif %}" style="font-size:.68rem;">{{ bill.status }}</span></td>
+              <td>{% if bill.status != 'PAID' %}<a href="{% url 'pay_monthly_bill' bill.pk %}" class="btn btn-xs btn-success">Pay</a>{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="text-center text-muted py-3">No bills yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# Payment history #}
+    <div class="card">
+      <div class="card-header bg-white border-0 pt-3 fw-semibold">
+        <i class="bi bi-receipt text-success"></i> All Payments
+      </div>
+      <div class="table-responsive-wrapper">
+        <table class="table mb-0 small">
+          <thead><tr><th>Receipt</th><th>Type</th><th>Amount (KSh)</th><th>Status</th><th class="d-none d-md-table-cell">Date</th></tr></thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td><code style="font-size:.7rem;">{{ p.receipt_number }}</code></td>
+              <td>{{ p.get_payment_type_display }}</td>
+              <td>{{ p.amount|floatformat:2 }}</td>
+              <td><span class="badge {% if p.status == 'PAID' %}badge-paid{% else %}badge-unpaid{% endif %}" style="font-size:.68rem;">{{ p.status }}</span></td>
+              <td class="d-none d-md-table-cell">{{ p.payment_date|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">No payments</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>{# end right col #}
+</div>{# end row #}
+{% endblock %}

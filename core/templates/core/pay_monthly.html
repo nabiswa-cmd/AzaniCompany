@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block title %}Pay Monthly Bill{% endblock %}
+{% block page_title %}📅 Monthly Bill Payment{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-5"><div class="form-card">
+  <h5>{{ institution.name }}</h5><hr>
+  {% if was_disconnected %}
+  <div class="alert alert-warning"><i class="bi bi-wifi-off"></i> Institution is <strong>disconnected</strong>. Reconnection fee of <strong>KSh {{ reconnection_fee|floatformat:2 }}</strong> will be added.</div>
+  {% endif %}
+  <div class="card bg-light mb-3"><div class="card-body">
+    <div class="row small">
+      <div class="col-6">Billing Month:</div><div class="col-6 fw-semibold">{{ bill.billing_month|date:"F Y" }}</div>
+      <div class="col-6">Bandwidth:</div><div class="col-6">{{ bill.bandwidth }} MBPS</div>
+      <div class="col-6">Base Amount:</div><div class="col-6">KSh {{ bill.base_amount|floatformat:2 }}</div>
+      {% if bill.overdue_fine %}<div class="col-6 text-danger">Overdue Fine (15%):</div><div class="col-6 text-danger fw-semibold">KSh {{ bill.overdue_fine|floatformat:2 }}</div>{% endif %}
+      {% if was_disconnected %}<div class="col-6 text-warning">Reconnection Fee:</div><div class="col-6 text-warning fw-semibold">KSh {{ reconnection_fee|floatformat:2 }}</div>{% endif %}
+      <div class="col-6 fw-bold border-top pt-2 mt-1">Total Due:</div>
+      <div class="col-6 fw-bold text-primary border-top pt-2 mt-1 fs-5">KSh {{ bill.total_amount|floatformat:2 }}{% if was_disconnected %} + {{ reconnection_fee|floatformat:0 }}{% endif %}</div>
+    </div>
+  </div></div>
+  <form method="post">{% csrf_token %}
+    <button type="submit" class="btn btn-success w-100 py-2"><i class="bi bi-check2-circle"></i> Confirm Payment</button>
+  </form>
+  <a href="{% url 'institution_detail' institution.pk %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+</div></div></div>
+{% endblock %}

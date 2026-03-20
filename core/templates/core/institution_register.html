@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% block title %}Register Institution{% endblock %}
+{% block page_title %}➕ Register Institution{% endblock %}
+{% block content %}
+<div class="alert alert-info"><i class="bi bi-info-circle-fill"></i>
+  Registration fee of <strong>KSh {{ registration_fee|floatformat:0 }}</strong> will be billed immediately.
+</div>
+<form method="post">{% csrf_token %}
+  <div class="row g-3 align-items-start">
+    <div class="col-12 col-lg-6">
+      <div class="form-card">
+        <div class="section-title"><i class="bi bi-building"></i> Institution Details</div>
+        {% for field in inst_form %}
+        <div class="mb-3"><label class="form-label fw-semibold">{{ field.label }}</label>{{ field }}
+          {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="form-card">
+        <div class="section-title"><i class="bi bi-person"></i> Contact Person Details</div>
+        {% for field in contact_form %}
+        <div class="mb-3"><label class="form-label fw-semibold">{{ field.label }}</label>{{ field }}
+          {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}</div>
+        {% endfor %}
+        <div class="alert alert-warning mt-2 small"><strong>Registration Fee:</strong> KSh {{ registration_fee|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-3 d-flex gap-2">
+    <button type="submit" class="btn btn-azani px-4"><i class="bi bi-check-circle"></i> Register</button>
+    <a href="{% url 'institution_list' %}" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

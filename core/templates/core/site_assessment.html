@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% block title %}Site Assessment{% endblock %}
+{% block page_title %}🔍 Site Assessment: {{ institution.name }}{% endblock %}
+{% block content %}
+<div class="alert alert-info small"><strong>Guide:</strong> If ready → pay KSh 10,000 installation fee.
+If not ready → institution may purchase PCs (KSh {{ pc_cost|floatformat:0 }} each) and LAN nodes from Azani.</div>
+<div class="form-card"><form method="post">{% csrf_token %}
+  <div class="row g-3">
+    <div class="col-12 col-md-6"><label class="form-label fw-semibold">Assessment Date</label>{{ form.assessment_date }}</div>
+    <div class="col-12 col-md-6"><label class="form-label fw-semibold">Assessed By</label>{{ form.assessed_by }}</div>
+    <div class="col-12 col-md-4"><label class="form-label fw-semibold">Number of Users</label>{{ form.number_of_users }}</div>
+    <div class="col-12 col-md-4"><label class="form-label fw-semibold">Number of Computers</label>{{ form.number_of_computers }}</div>
+    <div class="col-12 col-md-4"><label class="form-label fw-semibold">Number of LAN Nodes</label>{{ form.number_of_lan_nodes }}</div>
+    <div class="col-12 col-md-4"><label class="form-label fw-semibold">Has Computers?</label><br>
+      <div class="form-check mt-2">{{ form.has_computers }}<label class="form-check-label ms-2">Has computers</label></div></div>
+    <div class="col-12 col-md-4"><label class="form-label fw-semibold">Has LAN?</label><br>
+      <div class="form-check mt-2">{{ form.has_lan }}<label class="form-check-label ms-2">Has LAN</label></div></div>
+    <div class="col-12 col-md-4"><label class="form-label fw-semibold">Ready for Installation?</label><br>
+      <div class="form-check mt-2">{{ form.is_ready }}<label class="form-check-label ms-2">All requirements met</label></div></div>
+    <div class="col-12"><hr><div class="section-title">Infrastructure Purchases (if needed)</div></div>
+    <div class="col-12 col-md-6"><label class="form-label fw-semibold">PCs to Purchase from Azani</label>{{ form.pcs_to_purchase }}
+      <small class="text-muted">@ KSh {{ pc_cost|floatformat:0 }} each</small></div>
+    <div class="col-12 col-md-6"><label class="form-label fw-semibold">LAN Nodes to Purchase</label>{{ form.lan_nodes_to_purchase }}
+      <small class="text-muted">2-10: KSh 10,000 | 11-20: KSh 20,000 | 21-40: KSh 30,000 | 41-100: KSh 40,000</small></div>
+    <div class="col-12"><label class="form-label fw-semibold">Remarks</label>{{ form.remarks }}</div>
+  </div>
+  <div class="mt-3 d-flex gap-2">
+    <button type="submit" class="btn btn-azani"><i class="bi bi-save"></i> Save Assessment</button>
+    <a href="{% url 'institution_detail' institution.pk %}" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form></div>
+{% endblock %}

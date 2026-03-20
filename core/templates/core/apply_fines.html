@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block title %}Apply Overdue Fines{% endblock %}
+{% block page_title %}⚠️ Apply Overdue Fines & Disconnections{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-6"><div class="form-card">
+  <div class="alert alert-warning">
+    <h6><i class="bi bi-exclamation-triangle"></i> What this does:</h6>
+    <ul class="small mb-0">
+      <li>Bills past due date → <strong>15% overdue fine</strong> applied</li>
+      <li>Overdue bills still unpaid after 10th of next month → institution <strong>disconnected</strong></li>
+      <li>Reconnection requires: all arrears + KSh 1,000 reconnection fee</li>
+    </ul>
+  </div>
+  {% if overdue_count > 0 %}
+  <div class="alert alert-danger"><strong>{{ overdue_count }}</strong> bill(s) currently overdue and pending fines.</div>
+  {% else %}
+  <div class="alert alert-success">✅ No overdue bills found.</div>
+  {% endif %}
+  <form method="post">{% csrf_token %}
+    <button type="submit" class="btn btn-danger w-100" {% if overdue_count == 0 %}disabled{% endif %}>
+      <i class="bi bi-lightning-charge"></i> Apply Fines &amp; Process Disconnections
+    </button>
+  </form>
+  <a href="{% url 'billing_list' %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+</div></div></div>
+{% endblock %}

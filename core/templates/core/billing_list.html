@@ -1,0 +1,124 @@
+{% extends 'core/base.html' %}
+{% block title %}Monthly Bills{% endblock %}
+{% block page_title %}📋 Monthly Bills{% endblock %}
+{% block content %}
+
+<div class="card mb-3 p-3">
+  <form method="get">
+    <div class="row g-2 align-items-end">
+      <div class="col-6 col-md-3">
+        <label class="form-label small fw-semibold mb-1">Month</label>
+        <input type="month" name="month" value="{{ month }}" class="form-control form-control-sm">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small fw-semibold mb-1">Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="BILLED"       {% if status_filter == 'BILLED'       %}selected{% endif %}>Billed</option>
+          <option value="PAID"         {% if status_filter == 'PAID'         %}selected{% endif %}>Paid</option>
+          <option value="OVERDUE"      {% if status_filter == 'OVERDUE'      %}selected{% endif %}>Overdue</option>
+          <option value="DISCONNECTED" {% if status_filter == 'DISCONNECTED' %}selected{% endif %}>Disconnected</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-6 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-azani btn-sm">Filter</button>
+        <a href="{% url 'billing_list' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+{# ── Summary cards ── #}
+<div class="row g-2 mb-3">
+  <div class="col-6 col-md-3">
+    <div class="card p-2 p-md-3 text-center">
+      <div class="text-muted" style="font-size:.75rem;">Billed</div>
+      <div class="fw-bold small">KSh {{ summary.total_billed|default:0|floatformat:0 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-2 p-md-3 text-center">
+      <div class="text-muted" style="font-size:.75rem;">Fines</div>
+      <div class="fw-bold small text-danger">KSh {{ summary.total_fines|default:0|floatformat:0 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-2 p-md-3 text-center">
+      <div class="text-muted" style="font-size:.75rem;">Reconnection</div>
+      <div class="fw-bold small text-warning">KSh {{ summary.total_reconnection|default:0|floatformat:0 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-2 p-md-3 text-center">
+      <div class="text-muted" style="font-size:.75rem;">Total</div>
+      <div class="fw-bold small text-primary">KSh {{ summary.total_amount|default:0|floatformat:0 }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span class="fw-semibold">{{ bills.count }} record(s)</span>
+    <div class="d-flex gap-2">
+      <a href="{% url 'generate_monthly_bills' %}" class="btn btn-sm btn-azani"><i class="bi bi-plus"></i> Generate</a>
+      <a href="{% url 'apply_overdue_fines' %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-exclamation-triangle"></i> Fines</a>
+    </div>
+  </div>
+  <div class="table-responsive-wrapper">
+    <table class="table mb-0 small">
+      <thead>
+        <tr>
+          <th>Institution</th>
+          <th class="d-none d-md-table-cell">Type</th>
+          <th>Month</th>
+          <th class="d-none d-sm-table-cell">MBPS</th>
+          <th>Base</th>
+          <th class="d-none d-md-table-cell">Fine</th>
+          <th class="d-none d-lg-table-cell">Reconnect</th>
+          <th>Total (KSh)</th>
+          <th class="d-none d-md-table-cell">Due</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bill in bills %}
+        <tr>
+          <td><a href="{% url 'institution_detail' bill.institution.pk %}">{{ bill.institution.name|truncatechars:18 }}</a></td>
+          <td class="d-none d-md-table-cell">{{ bill.institution.get_institution_type_display }}</td>
+          <td style="white-space:nowrap;">{{ bill.billing_month|date:"M Y" }}</td>
+          <td class="d-none d-sm-table-cell">{{ bill.bandwidth }}</td>
+          <td>{{ bill.base_amount|floatformat:0 }}</td>
+          <td class="d-none d-md-table-cell">
+            {% if bill.overdue_fine %}<span class="text-danger">{{ bill.overdue_fine|floatformat:0 }}</span>{% else %}—{% endif %}
+          </td>
+          <td class="d-none d-lg-table-cell">
+            {% if bill.reconnection_fee %}<span class="text-warning">{{ bill.reconnection_fee|floatformat:0 }}</span>{% else %}—{% endif %}
+          </td>
+          <td class="fw-semibold">{{ bill.total_amount|floatformat:2 }}</td>
+          <td class="d-none d-md-table-cell" style="white-space:nowrap;">{{ bill.due_date }}</td>
+          <td>
+            <span class="badge
+              {% if bill.status == 'PAID' %}badge-paid
+              {% elif bill.status == 'OVERDUE' %}badge-overdue
+              {% elif bill.status == 'DISCONNECTED' %}badge-disconnected
+              {% else %}badge-pending{% endif %}"
+              style="font-size:.68rem;">{{ bill.status }}
+            </span>
+          </td>
+          <td>
+            {% if bill.status != 'PAID' %}
+              <a href="{% url 'pay_monthly_bill' bill.pk %}" class="btn btn-xs btn-success">Pay</a>
+            {% else %}
+              <span class="text-success">✓</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11" class="text-center py-5 text-muted">No billing records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

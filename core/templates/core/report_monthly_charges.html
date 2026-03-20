@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+{% block title %}Monthly Charges Report{% endblock %}
+{% block page_title %}💰 Monthly Charges by Category{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 no-print">
+  <form method="get" class="d-flex gap-2">
+    <input type="month" name="month" value="{{ month }}" class="form-control form-control-sm">
+    <button type="submit" class="btn btn-sm btn-azani">Filter</button>
+    <a href="{% url 'report_monthly_charges' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+  </form>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="d-none d-print-block text-center mb-4"><h3>AZANI INTERNET SERVICE PROVIDER</h3><h5>Monthly Charges Report</h5><p>Date: {{ report_date }}{% if month %} | Filter: {{ month }}{% endif %}</p><hr></div>
+<!-- Summary by type -->
+<div class="card mb-3">
+  <div class="card-header bg-white border-0 pt-3 fw-semibold"><i class="bi bi-bar-chart text-primary"></i> Summary by Institution Type</div>
+  <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0">
+    <thead><tr><th>Type</th><th>Bills</th><th>Base (KSh)</th><th>Fines (KSh)</th><th>Reconnection (KSh)</th><th>Total (KSh)</th></tr></thead>
+    <tbody>{% for row in type_summary %}<tr>
+      <td class="fw-semibold">{{ row.type }}</td><td>{{ row.count }}</td>
+      <td>{{ row.base|floatformat:2 }}</td>
+      <td class="text-danger">{% if row.fines %}{{ row.fines|floatformat:2 }}{% else %}—{% endif %}</td>
+      <td class="text-warning">{% if row.reconnection %}{{ row.reconnection|floatformat:2 }}{% else %}—{% endif %}</td>
+      <td class="fw-bold">{{ row.total|floatformat:2 }}</td>
+    </tr>{% endfor %}</tbody>
+    <tfoot class="table-primary fw-bold"><tr>
+      <td>GRAND TOTAL</td><td></td>
+      <td>{{ grand.base|default:0|floatformat:2 }}</td>
+      <td class="text-danger">{{ grand.fines|default:0|floatformat:2 }}</td>
+      <td class="text-warning">{{ grand.reconnection|default:0|floatformat:2 }}</td>
+      <td class="text-primary fs-6">{{ grand.total|default:0|floatformat:2 }}</td>
+    </tr></tfoot>
+  </table></div></div>
+</div>
+<!-- Detail -->
+<div class="card">
+  <div class="card-header bg-white border-0 pt-3 fw-semibold">Detailed Records</div>
+  <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0 small">
+    <thead><tr><th>Institution</th><th>Type</th><th>Month</th><th>MBPS</th><th>Base</th><th>Fine</th><th>Reconnect</th><th>Total (KSh)</th><th>Status</th></tr></thead>
+    <tbody>{% for bill in bills %}<tr>
+      <td><a href="{% url 'institution_detail' bill.institution.pk %}" class="no-print">{{ bill.institution.name|truncatechars:22 }}</a><span class="d-none d-print-inline">{{ bill.institution.name }}</span></td>
+      <td>{{ bill.institution.get_institution_type_display }}</td>
+      <td>{{ bill.billing_month|date:"M Y" }}</td>
+      <td>{{ bill.bandwidth }}</td>
+      <td>{{ bill.base_amount|floatformat:0 }}</td>
+      <td class="text-danger">{% if bill.overdue_fine %}{{ bill.overdue_fine|floatformat:0 }}{% else %}—{% endif %}</td>
+      <td>{% if bill.reconnection_fee %}{{ bill.reconnection_fee|floatformat:0 }}{% else %}—{% endif %}</td>
+      <td class="fw-semibold">{{ bill.total_amount|floatformat:2 }}</td>
+      <td><span class="badge {% if bill.status == 'PAID' %}badge-paid{% elif bill.status == 'OVERDUE' %}badge-overdue{% elif bill.status == 'DISCONNECTED' %}badge-disconnected{% else %}badge-pending{% endif %}">{{ bill.status }}</span></td>
+    </tr>{% empty %}<tr><td colspan="9" class="text-center text-muted py-4">No records found.</td></tr>{% endfor %}</tbody>
+  </table></div></div>
+</div>
+{% endblock %}

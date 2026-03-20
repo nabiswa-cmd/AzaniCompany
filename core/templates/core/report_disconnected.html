@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% block title %}Disconnection Report{% endblock %}
+{% block page_title %}🔌 Disconnected Institutions{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 no-print">
+  <span class="text-muted small">Generated: {{ report_date }}</span>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="d-none d-print-block text-center mb-4"><h3>AZANI INTERNET SERVICE PROVIDER</h3><h5>Disconnection Report</h5><p>Date: {{ report_date }}</p><hr></div>
+{% if details %}
+<div class="alert alert-danger"><strong>{{ details|length }} institution(s)</strong> disconnected. Reconnection fee: <strong>KSh {{ reconnection_fee|floatformat:2 }}</strong> per institution (after clearing arrears).</div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0 small">
+    <thead><tr><th>#</th><th>Institution</th><th>Type</th><th>County</th><th>Contact</th><th>Disconnected</th><th>Owed (KSh)</th><th>To Reconnect (KSh)</th><th class="no-print"></th></tr></thead>
+    <tbody>{% for d in details %}<tr class="table-danger">
+      <td>{{ forloop.counter }}</td>
+      <td><a href="{% url 'institution_detail' d.institution.pk %}" class="no-print fw-semibold">{{ d.institution.name }}</a><span class="d-none d-print-inline fw-semibold">{{ d.institution.name }}</span></td>
+      <td>{{ d.institution.get_institution_type_display }}</td>
+      <td>{{ d.institution.county }}</td>
+      <td>{% if d.institution.contact_person %}{{ d.institution.contact_person.full_name }}<br><small>{{ d.institution.contact_person.phone }}</small>{% else %}—{% endif %}</td>
+      <td>{% if d.last_bill %}{{ d.last_bill.disconnection_date|default:"—" }}{% else %}—{% endif %}</td>
+      <td class="fw-semibold text-danger">{{ d.total_owed|floatformat:2 }}</td>
+      <td class="fw-bold">{{ d.reconnection_cost|floatformat:2 }}</td>
+      <td class="no-print"><a href="{% url 'institution_detail' d.institution.pk %}" class="btn btn-xs btn-warning">View</a></td>
+    </tr>{% endfor %}</tbody>
+  </table></div></div>
+</div>
+{% else %}
+<div class="alert alert-success text-center py-5"><i class="bi bi-wifi fs-2 d-block mb-2"></i><strong>No disconnections! All institutions are connected.</strong></div>
+{% endif %}
+{% endblock %}

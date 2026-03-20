@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% block title %}Service Aggregate — {{ institution.name }}{% endblock %}
+{% block page_title %}📦 Service Aggregate: {{ institution.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 no-print">
+  <a href="{% url 'reports_home' %}" class="btn btn-sm btn-outline-secondary">← Reports</a>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+</div>
+<div class="d-none d-print-block text-center mb-4"><h3>AZANI INTERNET SERVICE PROVIDER</h3><h5>Service Aggregate Report</h5><p>Institution: {{ institution.name }} | Date: {{ report_date }}</p><hr></div>
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header bg-white border-0 pt-3 fw-semibold">Payments by Service Type</div>
+      <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0">
+        <thead><tr><th>Service</th><th>Count</th><th>Total (KSh)</th></tr></thead>
+        <tbody>{% for row in service_summary %}<tr>
+          <td>{{ row.payment_type }}</td><td>{{ row.count }}</td>
+          <td class="fw-semibold">{{ row.total|floatformat:2 }}</td>
+        </tr>{% empty %}<tr><td colspan="3" class="text-center text-muted py-3">No paid payments</td></tr>{% endfor %}</tbody>
+        <tfoot class="table-success fw-bold"><tr><td>GRAND TOTAL</td><td></td><td>KSh {{ grand_total|floatformat:2 }}</td></tr></tfoot>
+      </table></div></div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header bg-white border-0 pt-3 fw-semibold">Monthly Billing History</div>
+      <div class="card-body p-0"><div class="table-responsive-wrapper"><table class="table mb-0 small">
+        <thead><tr><th>Month</th><th>MBPS</th><th>Base</th><th>Fine</th><th>Reconnect</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>{% for bill in monthly %}<tr>
+          <td>{{ bill.billing_month|date:"M Y" }}</td><td>{{ bill.bandwidth }}</td>
+          <td>{{ bill.base_amount|floatformat:0 }}</td>
+          <td>{% if bill.overdue_fine %}<span class="text-danger">{{ bill.overdue_fine|floatformat:0 }}</span>{% else %}—{% endif %}</td>
+          <td>{% if bill.reconnection_fee %}{{ bill.reconnection_fee|floatformat:0 }}{% else %}—{% endif %}</td>
+          <td class="fw-semibold">{{ bill.total_amount|floatformat:2 }}</td>
+          <td><span class="badge {% if bill.status == 'PAID' %}badge-paid{% elif bill.status == 'OVERDUE' %}badge-overdue{% else %}badge-disconnected{% endif %}">{{ bill.status }}</span></td>
+        </tr>{% empty %}<tr><td colspan="7" class="text-center text-muted py-3">No monthly bills</td></tr>{% endfor %}</tbody>
+      </table></div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

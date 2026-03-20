@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}📊 Reports Centre{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-6 col-lg-4"><div class="card p-3 h-100">
+    <div class="fs-2 mb-2">🏫</div><h6 class="fw-bold">Registered Institutions</h6>
+    <p class="text-muted small">All enrolled institutions grouped by type with full contact details.</p>
+    <a href="{% url 'report_registered' %}" class="btn btn-azani btn-sm mt-auto">View Report</a>
+  </div></div>
+  <div class="col-md-6 col-lg-4"><div class="card p-3 h-100">
+    <div class="fs-2 mb-2">⚠️</div><h6 class="fw-bold">Defaulters Report</h6>
+    <p class="text-muted small">Institutions with unpaid monthly bills (overdue or disconnected).</p>
+    <a href="{% url 'report_defaulters' %}" class="btn btn-warning btn-sm mt-auto">View Report</a>
+  </div></div>
+  <div class="col-md-6 col-lg-4"><div class="card p-3 h-100">
+    <div class="fs-2 mb-2">🔌</div><h6 class="fw-bold">Disconnection Report</h6>
+    <p class="text-muted small">Disconnected institutions, outstanding amounts and reconnection costs.</p>
+    <a href="{% url 'report_disconnected' %}" class="btn btn-danger btn-sm mt-auto">View Report</a>
+  </div></div>
+  <div class="col-md-6 col-lg-4"><div class="card p-3 h-100">
+    <div class="fs-2 mb-2">🖥️</div><h6 class="fw-bold">Infrastructure Requirements</h6>
+    <p class="text-muted small">PC and LAN requirements and costs for all assessed institutions.</p>
+    <a href="{% url 'report_infrastructure' %}" class="btn btn-outline-primary btn-sm mt-auto">View Report</a>
+  </div></div>
+  <div class="col-md-6 col-lg-4"><div class="card p-3 h-100">
+    <div class="fs-2 mb-2">💰</div><h6 class="fw-bold">Monthly Charges by Category</h6>
+    <p class="text-muted small">Monthly charges, overdue fines and reconnection fees by institution type.</p>
+    <a href="{% url 'report_monthly_charges' %}" class="btn btn-outline-success btn-sm mt-auto">View Report</a>
+  </div></div>
+  <div class="col-md-6 col-lg-4"><div class="card p-3 h-100">
+    <div class="fs-2 mb-2">📦</div><h6 class="fw-bold">Service Aggregate Per Institution</h6>
+    <p class="text-muted small">Total amounts per service type for a specific institution.</p>
+    <div class="mt-auto">
+      <select class="form-select form-select-sm mb-2" id="inst-sel">
+        <option value="">Select institution…</option>
+        {% for inst in institutions %}<option value="{% url 'report_service_aggregate' inst.pk %}">{{ inst.name }}</option>{% endfor %}
+      </select>
+      <button onclick="var v=document.getElementById('inst-sel').value;if(v)window.location=v;" class="btn btn-outline-info btn-sm w-100">View Report</button>
+    </div>
+  </div></div>
+</div>
+{% endblock %}

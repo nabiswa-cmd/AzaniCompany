@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block title %}Pay Installation Fee{% endblock %}
+{% block page_title %}🔧 Installation Fee{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-5"><div class="form-card">
+  <h5>{{ institution.name }}</h5>
+  <p class="text-muted small">{{ institution.get_institution_type_display }} · {{ institution.county }}</p><hr>
+  <div class="alert alert-success"><i class="bi bi-check-circle"></i> Site assessed and ready for installation.</div>
+  <div class="alert alert-warning"><strong>Installation Fee:</strong> KSh {{ installation_fee|floatformat:2 }}<br><small>One-time fee. Internet activated on payment.</small></div>
+  <form method="post">{% csrf_token %}
+    <button type="submit" class="btn btn-success w-100 py-2"><i class="bi bi-wifi"></i> Pay KSh {{ installation_fee|floatformat:2 }} &amp; Activate Internet</button>
+  </form>
+  <a href="{% url 'institution_detail' institution.pk %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+</div></div></div>
+{% endblock %}

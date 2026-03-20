@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block title %}Generate Bills{% endblock %}
+{% block page_title %}📋 Generate Monthly Bills{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-5"><div class="form-card">
+  <div class="alert alert-info small">Generates bills for all <strong>active institutions</strong>. Existing bills for the same month are skipped.</div>
+  <form method="post">{% csrf_token %}
+    <div class="mb-3"><label class="form-label fw-semibold">Billing Month</label>{{ form.billing_month }}
+      {% if form.billing_month.errors %}<div class="text-danger small">{{ form.billing_month.errors }}</div>{% endif %}</div>
+    <div class="mb-3"><label class="form-label fw-semibold">Payment Due Date</label>{{ form.due_date }}
+      {% if form.due_date.errors %}<div class="text-danger small">{{ form.due_date.errors }}</div>{% endif %}</div>
+    <button type="submit" class="btn btn-azani w-100"><i class="bi bi-calendar-plus"></i> Generate Bills</button>
+    <a href="{% url 'billing_list' %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+  </form>
+</div></div></div>
+{% endblock %}

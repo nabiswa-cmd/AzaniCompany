@@ -1,0 +1,143 @@
+from django.db import migrations, models
+import django.core.validators
+import django.db.models.deletion
+import django.utils.timezone
+from decimal import Decimal
+
+
+class Migration(migrations.Migration):
+    initial = True
+    dependencies = []
+
+    operations = [
+        migrations.CreateModel(
+            name='Institution',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False)),
+                ('name', models.CharField(max_length=200, unique=True)),
+                ('institution_type', models.CharField(max_length=20,
+                    choices=[('PRIMARY','Primary School'),('JUNIOR','Junior School'),
+                             ('SENIOR','Senior School'),('COLLEGE','College')])),
+                ('county', models.CharField(max_length=100)),
+                ('sub_county', models.CharField(max_length=100, blank=True)),
+                ('address', models.TextField()),
+                ('phone', models.CharField(max_length=20)),
+                ('email', models.EmailField()),
+                ('registration_date', models.DateField(default=django.utils.timezone.now)),
+                ('connection_status', models.CharField(max_length=20, default='PENDING',
+                    choices=[('PENDING','Pending Assessment'),('ASSESSED','Site Assessed'),
+                             ('READY','Ready for Installation'),('NEEDS_INFRA','Needs Infrastructure'),
+                             ('INSTALLED','Installed & Active'),('SUSPENDED','Suspended'),
+                             ('DISCONNECTED','Disconnected')])),
+                ('current_bandwidth', models.IntegerField(null=True, blank=True,
+                    choices=[(4,'4 MBPS'),(10,'10 MBPS'),(20,'20 MBPS'),(25,'25 MBPS'),(50,'50 MBPS')])),
+                ('subscription_start', models.DateField(null=True, blank=True)),
+                ('last_payment_date', models.DateField(null=True, blank=True)),
+                ('notes', models.TextField(blank=True)),
+            ],
+            options={'ordering': ['name']},
+        ),
+        migrations.CreateModel(
+            name='ContactPerson',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False)),
+                ('institution', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
+                    related_name='contact_person', to='core.institution')),
+                ('title', models.CharField(max_length=20, blank=True)),
+                ('first_name', models.CharField(max_length=100)),
+                ('last_name', models.CharField(max_length=100)),
+                ('designation', models.CharField(max_length=100)),
+                ('national_id', models.CharField(max_length=20, unique=True)),
+                ('phone', models.CharField(max_length=20)),
+                ('email', models.EmailField()),
+                ('alt_phone', models.CharField(max_length=20, blank=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='SiteAssessment',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False)),
+                ('institution', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
+                    related_name='site_assessment', to='core.institution')),
+                ('assessment_date', models.DateField(default=django.utils.timezone.now)),
+                ('assessed_by', models.CharField(max_length=100)),
+                ('number_of_users', models.PositiveIntegerField()),
+                ('has_computers', models.BooleanField(default=False)),
+                ('number_of_computers', models.PositiveIntegerField(default=0)),
+                ('has_lan', models.BooleanField(default=False)),
+                ('number_of_lan_nodes', models.PositiveIntegerField(default=0)),
+                ('is_ready', models.BooleanField(default=False)),
+                ('pcs_to_purchase', models.PositiveIntegerField(default=0)),
+                ('lan_nodes_to_purchase', models.PositiveIntegerField(default=0)),
+                ('remarks', models.TextField(blank=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Payment',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False)),
+                ('institution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                    related_name='payments', to='core.institution')),
+                ('payment_type', models.CharField(max_length=20,
+                    choices=[('REGISTRATION','Registration Fee'),('INSTALLATION','Installation Fee'),
+                             ('PC_PURCHASE','PC Purchase'),('LAN_PURCHASE','LAN Nodes Purchase'),
+                             ('MONTHLY','Monthly Internet Fee'),('OVERDUE_FINE','Overdue Fine'),
+                             ('RECONNECTION','Reconnection Fee')])),
+                ('amount', models.DecimalField(max_digits=12, decimal_places=2,
+                    validators=[django.core.validators.MinValueValidator(Decimal('0'))])),
+                ('status', models.CharField(max_length=10, default='UNPAID',
+                    choices=[('PAID','Paid'),('UNPAID','Unpaid'),('PARTIAL','Partial')])),
+                ('payment_date', models.DateField(null=True, blank=True)),
+                ('due_date', models.DateField(null=True, blank=True)),
+                ('billing_month', models.DateField(null=True, blank=True)),
+                ('receipt_number', models.CharField(max_length=50, unique=True)),
+                ('description', models.TextField(blank=True)),
+                ('overdue_fine', models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0'))),
+                ('reconnection_fee', models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0'))),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+            ],
+            options={'ordering': ['-created_at']},
+        ),
+        migrations.CreateModel(
+            name='BandwidthSubscription',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False)),
+                ('institution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                    related_name='subscriptions', to='core.institution')),
+                ('bandwidth', models.IntegerField(
+                    choices=[(4,'4 MBPS'),(10,'10 MBPS'),(20,'20 MBPS'),(25,'25 MBPS'),(50,'50 MBPS')])),
+                ('monthly_cost', models.DecimalField(max_digits=10, decimal_places=2)),
+                ('is_upgrade', models.BooleanField(default=False)),
+                ('previous_bandwidth', models.IntegerField(null=True, blank=True,
+                    choices=[(4,'4 MBPS'),(10,'10 MBPS'),(20,'20 MBPS'),(25,'25 MBPS'),(50,'50 MBPS')])),
+                ('discount_applied', models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0'))),
+                ('start_date', models.DateField(default=django.utils.timezone.now)),
+                ('end_date', models.DateField(null=True, blank=True)),
+                ('is_active', models.BooleanField(default=True)),
+            ],
+            options={'ordering': ['-start_date']},
+        ),
+        migrations.CreateModel(
+            name='MonthlyBilling',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False)),
+                ('institution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                    related_name='monthly_bills', to='core.institution')),
+                ('billing_month', models.DateField()),
+                ('bandwidth', models.IntegerField(
+                    choices=[(4,'4 MBPS'),(10,'10 MBPS'),(20,'20 MBPS'),(25,'25 MBPS'),(50,'50 MBPS')])),
+                ('base_amount', models.DecimalField(max_digits=10, decimal_places=2)),
+                ('overdue_fine', models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0'))),
+                ('reconnection_fee', models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0'))),
+                ('total_amount', models.DecimalField(max_digits=10, decimal_places=2)),
+                ('status', models.CharField(max_length=20, default='BILLED',
+                    choices=[('BILLED','Billed'),('PAID','Paid'),('OVERDUE','Overdue'),('DISCONNECTED','Disconnected')])),
+                ('payment_date', models.DateField(null=True, blank=True)),
+                ('due_date', models.DateField()),
+                ('disconnection_date', models.DateField(null=True, blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+            ],
+            options={'ordering': ['-billing_month', 'institution__name'],
+                     'unique_together': {('institution','billing_month')}},
+        ),
+    ]

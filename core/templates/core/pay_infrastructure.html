@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+{% block title %}Infrastructure Payment{% endblock %}
+{% block page_title %}🖥️ Infrastructure Payment{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7"><div class="form-card">
+  <h5>{{ institution.name }}</h5><hr>
+  <form method="post">{% csrf_token %}
+    <table class="table"><thead><tr><th>Select</th><th>Description</th><th>Amount (KSh)</th><th>Status</th></tr></thead>
+    <tbody>{% for p in unpaid_payments %}<tr>
+      <td><input type="checkbox" name="payment_ids" value="{{ p.pk }}" class="form-check-input" checked></td>
+      <td>{{ p.description }}</td>
+      <td><strong>{{ p.amount|floatformat:2 }}</strong></td>
+      <td><span class="badge badge-unpaid">Unpaid</span></td>
+    </tr>{% empty %}<tr><td colspan="4" class="text-center text-success py-3">✅ No outstanding infrastructure payments.</td></tr>{% endfor %}</tbody>
+    </table>
+    {% if unpaid_payments %}<button type="submit" class="btn btn-warning w-100"><i class="bi bi-cash-coin"></i> Confirm Payment(s)</button>{% endif %}
+  </form>
+  <a href="{% url 'institution_detail' institution.pk %}" class="btn btn-outline-secondary w-100 mt-2">Back</a>
+</div></div></div>
+{% endblock %}
