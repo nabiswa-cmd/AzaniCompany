@@ -1,5 +1,9 @@
 from pathlib import Path
 from decimal import Decimal
+from dotenv import load_dotenv
+import os
+import dj_database_url
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
@@ -42,13 +46,8 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'azani.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'azani_ispo.db',
-    }
-}
 
+DATABASES =  { 'default':dj_database_url.config(default = os.getenv('DATABASE_URL'))}
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
