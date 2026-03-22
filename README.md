@@ -3,30 +3,6 @@
 A fully-featured Django-based Database Management System for **Azani Company**,
 which provides internet services and infrastructure to learning institutions in Kenya.
 
----
-
-## Quick Start (4 Commands)
-
-```bash
-# 1. Install Django
-pip install -r requirements.txt
-
-# 2. Apply migrations (creates the database)
-cd azani
-python manage.py migrate
-
-# 3. Load demo data (12 institutions, all scenarios)
-python manage.py seed_demo_data
-
-# 4. Create admin user, then run
-python manage.py createsuperuser
-python manage.py runserver
-```
-
-Open **http://127.0.0.1:8000** in your browser.
-Admin panel: **http://127.0.0.1:8000/admin/**
-
----
 
 ## Business Rules Implemented
 
@@ -60,28 +36,6 @@ Admin panel: **http://127.0.0.1:8000/admin/**
 | 21 – 40 | 30,000 |
 | 41 – 100 | 40,000 |
 
----
-
-## Demo Data (seed_demo_data)
-
-Running `python manage.py seed_demo_data` creates **12 institutions** covering every scenario:
-
-| Institution | Type | Status | Notes |
-|---|---|---|---|
-| Nairobi West Primary School | PRIMARY | INSTALLED | 10 MBPS, all paid |
-| Mombasa Junior Academy | JUNIOR | INSTALLED | Upgraded 10→20 MBPS (10% discount) |
-| Kisumu Senior High School | SENIOR | INSTALLED | 25 MBPS, last month OVERDUE |
-| Nakuru Technical College | COLLEGE | INSTALLED | 50 MBPS, fully paid |
-| Thika Road Junior School | JUNIOR | DISCONNECTED | Failed to pay, disconnected |
-| Eldoret Primary School | PRIMARY | NEEDS_INFRA | Buying 10 PCs + 8 LAN nodes |
-| Kisii Senior Academy | SENIOR | READY | Awaiting installation payment |
-| Machakos Girls College | COLLEGE | PENDING | Just registered, not yet assessed |
-| Kajiado Primary School | PRIMARY | INSTALLED | 4 MBPS (smallest plan) |
-| Meru University College | COLLEGE | INSTALLED | Upgraded 20→50 MBPS (10% discount) |
-| Garissa Junior Secondary | JUNIOR | NEEDS_INFRA | Needs 15 PCs + 12 LAN nodes |
-| Nakuru Senior School | SENIOR | INSTALLED | 20 MBPS, 2 months OVERDUE |
-
----
 
 ## Features
 
@@ -113,73 +67,4 @@ Running `python manage.py seed_demo_data` creates **12 institutions** covering e
 7. **Installation Cost** — full cost breakdown per institution
 
 ---
-
-## Project Structure
-
-```
-azani/
-├── manage.py
-├── azani/                  ← Django project config
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── core/                   ← Main application
-    ├── models.py           ← 6 database models
-    ├── views.py            ← 25 views with full business logic
-    ├── forms.py            ← All forms
-    ├── urls.py             ← 22 URL routes
-    ├── admin.py            ← Admin panel config
-    ├── migrations/
-    │   └── 0001_initial.py
-    ├── management/
-    │   └── commands/
-    │       └── seed_demo_data.py   ← 12 demo institutions
-    └── templates/core/     ← 23 HTML templates
-```
-
----
-
-## Database Models
-
-| Model | Purpose |
-|---|---|
-| `Institution` | Core record — name, type, county, status, bandwidth |
-| `ContactPerson` | Contact details for institution representative |
-| `SiteAssessment` | Site visit findings — users, computers, LAN |
-| `Payment` | All financial transactions (7 payment types) |
-| `BandwidthSubscription` | Bandwidth history with upgrade discounts |
-| `MonthlyBilling` | Monthly bill with fine and reconnection tracking |
-
----
-
-## URL Reference
-
-| URL | Purpose |
-|---|---|
-| `/` | Dashboard |
-| `/institutions/` | All institutions |
-| `/institutions/register/` | Register new institution |
-| `/institutions/<id>/` | Institution detail |
-| `/institutions/<id>/edit/` | Edit institution |
-| `/institutions/<id>/assess/` | Site assessment |
-| `/institutions/<id>/subscription/` | Bandwidth management |
-| `/institutions/<id>/pay/registration/` | Pay registration fee |
-| `/institutions/<id>/pay/installation/` | Pay installation fee |
-| `/institutions/<id>/pay/infrastructure/` | Pay PC/LAN costs |
-| `/billing/` | Monthly bills list |
-| `/billing/generate/` | Generate bills |
-| `/billing/apply-fines/` | Apply overdue fines |
-| `/billing/<id>/pay/` | Pay a bill |
-| `/reports/` | Reports home |
-| `/reports/registered/` | Registered institutions |
-| `/reports/defaulters/` | Defaulters report |
-| `/reports/disconnected/` | Disconnection report |
-| `/reports/infrastructure/` | Infrastructure report |
-| `/reports/monthly-charges/` | Monthly charges |
-| `/reports/service-aggregate/<id>/` | Service aggregate |
-| `/reports/installation-cost/<id>/` | Installation cost |
-| `/admin/` | Django admin panel |
-
----
-
 © 2026 Azani Company Ltd. All rights reserved.
