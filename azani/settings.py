@@ -12,7 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
 DEBUG ='False'
 ALLOWED_HOSTS = ['azanicompany-production.up.railway.app']
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://azanicompany-production.up.railway.app",
+]
 # APPS
 INSTALLED_APPS = [
     'django.contrib.admin',
