@@ -10,8 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
-DEBUG = os.getenv('DEBUG', 'False') == 'True'  # get from env, default False
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'azanicompany-production.up.railway.app').split(',')
+DEBUG ='False'
+ALLOWED_HOSTS = ['azanicompany-production.up.railway.app']
 
 # APPS
 INSTALLED_APPS = [
