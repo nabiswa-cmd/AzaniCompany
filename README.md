@@ -2,7 +2,8 @@
 
 A fully-featured Django-based Database Management System for **Azani Company**,
 which provides internet services and infrastructure to learning institutions in Kenya.
-
+## Live Deployment
+https://azanicompany-production.up.railway.app/
 
 ## Business Rules Implemented
 
