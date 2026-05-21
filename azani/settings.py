@@ -58,7 +58,7 @@ WSGI_APPLICATION = 'azani.wsgi.application'
 
 # DATABASE
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(default=os.getenv('DIRECT_URL'))
 }
 
 # INTERNATIONALIZATION
