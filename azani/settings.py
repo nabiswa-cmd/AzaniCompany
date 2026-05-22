@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = 'azani-ispo-secret-key-change-in-production'
-DEBUG = os.getenv('DEBUG', 'False') == 'True'  # get from env, default False
+DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # APPS
@@ -57,8 +57,14 @@ TEMPLATES = [{
 WSGI_APPLICATION = 'azani.wsgi.application'
 
 # DATABASE
+# DATABASES = {
+#     'default': dj_database_url.config(default=os.getenv('DIRECT_URL'))
+# }
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DIRECT_URL'))
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 # INTERNATIONALIZATION
